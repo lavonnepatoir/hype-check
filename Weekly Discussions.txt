@@ -1,0 +1,11 @@
+1) Title of your DIY Project: Hype Check
+
+2) What have you worked on or accomplished this past week for your project or mentorship?
+This past week, I have worked on expanding my dataset to include more movies, and also considering the factor of genre into my data.
+
+3) Do you have any blockers? If so, what are they?
+I am currently manually pulling any additional Google Trends data that I need, I would like to find a way to automate this again without Google Trends blocking my IP Address (currently using pytrends requests).
+
+4) What do you intend to work on next week?
+I am going to explore usine ChromeDriver and Selenium to lessen my chances of having my IP Address blocked. I also want to create graphs that are interactive, and will work on switching from matplotlib to Plotly or Bokeh so I can add fun features like hover tooltips or a legend toggle!
+
