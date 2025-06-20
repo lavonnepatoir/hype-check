@@ -17,10 +17,32 @@
       margin-bottom: 30px;
     }
 
-    .iframe-container {
+    .tabs {
       display: flex;
-      flex-direction: row;
-      gap: 40px;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .tab-button {
+      padding: 10px 20px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background: #fff;
+      cursor: pointer;
+    }
+
+    .tab-button.active {
+      background: #007bff;
+      color: #fff;
+    }
+
+    .iframe-container {
+      display: none;
+    }
+
+    .iframe-container.active {
+      display: block;
     }
 
     iframe {
@@ -29,30 +51,39 @@
       border: 1px solid #ccc;
       border-radius: 8px;
     }
-
-    @media (min-width: 1000px) {
-      .iframe-container {
-        flex-direction: row;
-      }
-
-      iframe {
-        width: 48%;
-        height: 650px;
-      }
-    }
   </style>
 </head>
 <body>
 
   <h1>🎬 Movie Trends Dashboard</h1>
 
-  <div class="iframe-container">
+  <div class="tabs">
+    <button class="tab-button active" data-target="relative">Relative Trends</button>
+    <button class="tab-button" data-target="scatter">Rating vs Interest</button>
+  </div>
+
+  <div id="relative" class="iframe-container active">
     <iframe src="interactive_relative_trends.html" title="Google Trends Line Chart"></iframe>
   </div>
 
-  <div class="iframe-container">
-    <iframe src="interactive_scatter_rating_vs_interest.html" title="Rating vs. Interest Scatterplot"></iframe>
+  <div id="scatter" class="iframe-container">
+    <iframe src="interactive_scatter_rating_vs_interest.html" title="Rating vs Interest Scatterplot"></iframe>
   </div>
+
+  <script>
+    const buttons = document.querySelectorAll('.tab-button');
+    const containers = document.querySelectorAll('.iframe-container');
+
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        buttons.forEach(b => b.classList.remove('active'));
+        containers.forEach(c => c.classList.remove('active'));
+
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.target).classList.add('active');
+      });
+    });
+  </script>
 
 </body>
 </html>
