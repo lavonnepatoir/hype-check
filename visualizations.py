@@ -47,7 +47,7 @@ def plot_interactive_trends():
         except Exception as e:
             print(f"Error with {title}: {e}")
 
-    # Genre filters
+    # Genre filters as horizontal buttons
     for genre, indices in genre_map.items():
         visibility = [i in indices for i in range(len(fig.data))]
         buttons.append(dict(
@@ -70,16 +70,16 @@ def plot_interactive_trends():
         yaxis_title="Google Search Interest (0–100)",
         yaxis=dict(range=[0, 110]),
         template="plotly_white",
-        height=550,
-        margin=dict(t=80, b=100, l=50, r=50),
-        legend=dict(orientation="h", y=-0.3),
+        height=700,
+        margin=dict(t=80, b=130, l=50, r=50),  # enough bottom margin for both dropdown + legend
+        legend=dict(orientation="h", y=-0.50),  # push legend lower
         updatemenus=[dict(
-            type="dropdown",
-            direction="down",
+            type="buttons",
+            direction="right",
             showactive=True,
             buttons=buttons,
             x=0,
-            y=1.15,
+            y=-0.25,  # ✅ this puts it right under x-axis title
             xanchor="left",
             yanchor="top"
         )]
@@ -87,6 +87,7 @@ def plot_interactive_trends():
 
     fig.write_html(line_output)
     print(f"✅ Line chart saved to {os.path.abspath(line_output)}")
+
 
 
 # === Scatter Plot ===
@@ -144,19 +145,42 @@ def plot_interactive_scatter():
     fig.update_traces(marker=dict(size=8, opacity=0.85))
 
     fig.update_layout(
-        legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=-0.35,
-            xanchor="center",
-            x=0.5,
-            font=dict(size=10),
-            title=None
-        ),
-        margin=dict(l=50, r=50, t=80, b=150)
+        showlegend=False,  # hide built-in legend
+        #margin=dict(l=50, r=50, t=80, b=150)
     )
 
     fig.write_html(scatter_output)
+
+    # ✅ Append custom legend to saved HTML
+    with open(scatter_output, "r+", encoding="utf-8") as f:
+        html = f.read()
+
+        # Grab colors from fig
+        colors = {trace.name: trace.marker.color for trace in fig.data}
+
+        legend_cells = ""
+        for genre in genre_list:
+            color = colors.get(genre, "#000000")
+            legend_cells += f'''
+                <td style="border: none; padding: 4px 12px; text-align: center;">
+                    <span style="display:inline-block;width:12px;height:12px;background-color:{color};border-radius:50%;margin-right:6px;"></span>
+                    <span>{genre}</span>
+                </td>
+            '''
+
+        legend_html = f"""
+        <div style="overflow-x: auto; text-align:center; padding-top:2px;">
+            <table style="margin: auto; border-collapse: collapse; width: 100%;">
+                <tr>{legend_cells}</tr>
+            </table>
+        </div>
+        """
+
+        updated_html = html.replace("</body>", f"{legend_html}</body>")
+        f.seek(0)
+        f.write(updated_html)
+        f.truncate()
+
     print(f"✅ Scatter chart saved to {os.path.abspath(scatter_output)}")
 
 
