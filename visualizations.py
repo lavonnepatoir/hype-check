@@ -10,10 +10,9 @@ csv_folder = "movie-files"
 line_output = "interactive_relative_trends.html"
 scatter_output = "interactive_scatter_rating_vs_interest.html"
 
-# === Load Metadata ===
 metadata = pd.read_csv(metadata_path)
 
-# === Interactive Line Plot with Genre Filter (as Checkboxes) ===
+# === Line Chart ===
 def plot_interactive_trends():
     fig = go.Figure()
     buttons = []
@@ -27,7 +26,6 @@ def plot_interactive_trends():
         full_path = os.path.join(csv_folder, filename)
 
         if not os.path.exists(full_path):
-            print(f"⚠️ File not found: {filename}")
             continue
 
         try:
@@ -37,34 +35,26 @@ def plot_interactive_trends():
             df["day_offset"] = (df["Day"] - release_date).dt.days
             df = df[(df["day_offset"] >= -60) & (df["day_offset"] <= 14)]
 
-            visible = True  # default all visible
-
-            trace = go.Scatter(
+            fig.add_trace(go.Scatter(
                 x=df["day_offset"],
                 y=df["Interest"],
                 mode='lines',
                 name=title,
                 hovertemplate=f"<b>{title}</b><br>Day: %{{x}}<br>Interest: %{{y}}<extra></extra>"
-            )
-            fig.add_trace(trace)
+            ))
 
-            # group by genre for visibility filter
             genre_map.setdefault(genre, []).append(len(fig.data) - 1)
-
         except Exception as e:
-            print(f"❌ Error processing {title}: {e}")
+            print(f"Error with {title}: {e}")
 
-    # === Add genre-based checkbox filters ===
-    for genre, trace_indices in genre_map.items():
-        visibility = [False] * len(fig.data)
-        for i in trace_indices:
-            visibility[i] = True
-
+    # Genre filters
+    for genre, indices in genre_map.items():
+        visibility = [i in indices for i in range(len(fig.data))]
         buttons.append(dict(
             label=genre,
             method="update",
             args=[{"visible": visibility},
-                  {"title": f"Google Trends - Genre: {genre}"}]
+                  {"title": f"Google Trends by Genre: {genre}"}]
         ))
 
     buttons.insert(0, dict(
@@ -79,22 +69,27 @@ def plot_interactive_trends():
         xaxis_title="Days from Release (0 = Release Day)",
         yaxis_title="Google Search Interest (0–100)",
         yaxis=dict(range=[0, 110]),
-        legend=dict(orientation="h", y=-0.25),
         template="plotly_white",
+        height=550,
+        margin=dict(t=80, b=100, l=50, r=50),
+        legend=dict(orientation="h", y=-0.3),
         updatemenus=[dict(
-            type="buttons",
+            type="dropdown",
             direction="down",
             showactive=True,
             buttons=buttons,
-            x=1.05,
-            y=1.15
+            x=0,
+            y=1.15,
+            xanchor="left",
+            yanchor="top"
         )]
     )
 
     fig.write_html(line_output)
-    print(f"✅ Line chart saved to: {os.path.abspath(line_output)}")
+    print(f"✅ Line chart saved to {os.path.abspath(line_output)}")
 
-# === Interactive Scatter with Genre Checkboxes ===
+
+# === Scatter Plot ===
 def plot_interactive_scatter():
     data = {
         "Title": [],
@@ -142,39 +137,31 @@ def plot_interactive_scatter():
         hover_name="Title",
         title="TMDb Score vs Avg Google Trends Interest by Genre",
         labels={"Avg Interest": "Avg Google Search Interest"},
-        template="plotly_white"
+        template="plotly_white",
+        height=600
     )
 
-    # Checkbox filter by genre
-    buttons = [{
-        "label": "All Genres",
-        "method": "restyle",
-        "args": [{"visible": [True] * len(fig.data)}]
-    }]
-
-    for i, genre in enumerate(genre_list):
-        visibility = [trace.name == genre for trace in fig.data]
-        buttons.append({
-            "label": genre,
-            "method": "restyle",
-            "args": [{"visible": visibility}]
-        })
+    fig.update_traces(marker=dict(size=8, opacity=0.85))
 
     fig.update_layout(
-        updatemenus=[dict(
-            type="buttons",
-            direction="down",
-            showactive=True,
-            buttons=buttons,
-            x=1.05,
-            y=1.15
-        )]
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=-0.35,
+            xanchor="center",
+            x=0.5,
+            font=dict(size=10),
+            title=None
+        ),
+        margin=dict(l=50, r=50, t=80, b=150)
     )
 
     fig.write_html(scatter_output)
-    print(f"✅ Scatter chart saved to: {os.path.abspath(scatter_output)}")
+    print(f"✅ Scatter chart saved to {os.path.abspath(scatter_output)}")
 
-# === Run ===
+
+
+# === Run Both ===
 if __name__ == "__main__":
     plot_interactive_trends()
     plot_interactive_scatter()
