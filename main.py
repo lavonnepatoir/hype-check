@@ -24,6 +24,8 @@ else:
 
 # === Movie Titles ===
 movie_titles = [
+    "Anora",
+    "Call Me by Your Name",
     "Barbie",
     "Oppenheimer",
     "Don't Worry Darling",
