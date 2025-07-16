@@ -3,14 +3,12 @@ import csv
 import requests
 from dotenv import load_dotenv
 
-# === Load TMDb API Key ===
 load_dotenv()
 API_KEY = os.getenv("TMDB_API_KEY")
 if not API_KEY:
-    print("❌ TMDB API key not loaded.")
+    print("TMDB API key not loaded.")
     exit()
 
-# === Step 1: Fetch Genre Mapping ===
 genre_url = "https://api.themoviedb.org/3/genre/movie/list"
 genre_params = {"api_key": API_KEY}
 genre_response = requests.get(genre_url, params=genre_params)
@@ -20,10 +18,10 @@ if genre_response.status_code == 200:
     genre_data = genre_response.json().get("genres", [])
     genre_map = {genre["id"]: genre["name"] for genre in genre_data}
 else:
-    print("⚠️ Failed to fetch genre mapping.")
+    print("Failed to fetch genre mapping.")
 
-# === Movie Titles ===
 movie_titles = [
+    "Cinderella",
     "Anora",
     "Call Me by Your Name",
     "Barbie",
@@ -129,7 +127,6 @@ movie_titles = [
 ]
 
 
-# === Step 2: Save Metadata ===
 with open("movie_metadata.csv", "w", newline="", encoding="utf-8") as file:
     writer = csv.writer(file)
     writer.writerow(["Title", "Release Date", "Popularity", "Vote Average", "Genres"])
